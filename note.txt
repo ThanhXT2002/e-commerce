@@ -1,0 +1,30 @@
+composer create-project --prefer-dist laravel/laravel my-project
+php artisan make:controller MyController --resource
+php artisan make:model MyModel -m
+php artisan make:model Post -mf
+
+php artisan make:migration add_idt_and_description_to_tour_table --table=Tour
+php artisan make:migration create_users_table
+php artisan migrate
+php artisan migrate:reset
+php artisan migrate:refresh 
+
+
+
+composer require yoeunes/toastr
+
+
+php artisan make:seeder UsersTableSeeder
+php artisan db:seed
+
+-Chạy lại các seeders sau khi làm mới cơ sở dữ liệu: php artisan migrate:fresh --seed
+-Chạy một seeder cụ thể: php artisan db:seed --class=UsersTableSeeder
+
+làm mới cơ sở dữ liệu:
+    php artisan migrate:fresh --seed
+
+
+php artisan make:middleware CheckAuthenticated
+php artisan make:request StoreUserRequest
+
+post_catalogue_translate
