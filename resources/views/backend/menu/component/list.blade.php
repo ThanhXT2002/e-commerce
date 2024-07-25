@@ -48,18 +48,18 @@
                             <div class="card-header  bg-teal">
                                 <h4 class="card-title w-100">
                                     <a class="d-block w-100 font-weight-bold menu-module text-white"
-                                        data-model={{$key}} data-toggle="collapse"
+                                        data-model={{ $key }} data-toggle="collapse"
                                         href="#{{ $key }}">
                                         {{ $val }}
                                     </a>
                                 </h4>
                             </div>
-                            <div id="{{$key}}" class="collapse" data-parent="#accordion">
+                            <div id="{{ $key }}" class="collapse" data-parent="#accordion">
                                 <div class="card-body">
-                                    
-                                        <input type="text" class="form-control search-menu form-control-sm rounded-0"
-                                            value="" name="keyword" placeholder="Nhap 2 ky tu de tiem kiem....">
-                                    
+
+                                    <input type="text" class="form-control search-menu form-control-sm rounded-0"
+                                        value="" name="keyword" placeholder="Nhap 2 ky tu de tiem kiem....">
+
                                     <div class="menu-list mt-3">
 
                                     </div>
@@ -97,26 +97,26 @@
                     <div
                         class="notification text-center mt-2 {{ is_array(old('menu')) && count(old('menu')) ? 'none' : '' }}">
                         <h5>Danh sách kiên kết này chưa có bất kỳ đường dẫn nào.</h5>
-                        <p>Hãy nhấn vào <span class="text-info">"Thêm đường dẫn"</span> để bắt đầu thêm.</p>
+                        <p>Hãy nhấn vào <span class="text-info">"Thêm đường dẫn"</span> để bắt đầu thêm. </p>
                     </div>
                     @if (is_array(old('menu')) && count(old('menu')))
                         @foreach (old('menu')['name'] as $key => $val)
-                            <div class="row mb-3 menu-item ">
+                            <div class="row mb-3 menu-item {{ old('menu')['canonical'][$key] }}">
                                 <div class="col-lg-4">
                                     <input type="text" name="menu[name][]" value="{{ $val }}"
                                         class="form-control form-control-sm rounded-0">
                                 </div>
                                 <div class="col-lg-6">
                                     <input type="text" name="menu[canonical][]"
-                                        value="{{ old('menu')[canonical][$key] }}"
+                                        value="{{ old('menu')['canonical'][$key] }}"
                                         class="form-control form-control-sm rounded-0">
                                 </div>
                                 <div class="col-lg-1">
-                                    <input type="text" name="menu[order][]" value="{{ old('menu')[order][$key] }}"
+                                    <input type="text" name="menu[order][]" value="{{ old('menu')['order'][$key] }}"
                                         class="form-control form-control-sm rounded-0">
                                 </div>
                                 <div class="col-lg-1 text-center">
-                                    <a href="" class="delete-menu btn btn-danger btn-sm">
+                                    <a  class="delete-menu btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -130,3 +130,31 @@
     </div>
 </div>
 
+{{-- <div class="row mb-3 menu-item product">
+    <div class="col-lg-4"><input type="text" class="form-control form-control-sm rounded-0" name="menu[name][]"
+            value="product 12386353"></div>
+    <div class="col-lg-6"><input type="text" class="form-control form-control-sm rounded-0"
+            name="menu[canonical][]" value="product"></div>
+    <div class="col-lg-1"><input type="text" class="form-control form-control-sm rounded-0 int text-right"
+            name="menu[order][]" value="0"></div>
+    <div class="col-lg-1 text-center"><a class="delete-menu btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>
+    </div>
+</div>
+
+
+<div class="row mb-3 menu-item ">
+    <div class="col-lg-4">
+        <input type="text" name="menu[name][]" value="product 12386353" class="form-control form-control-sm rounded-0">
+    </div>
+    <div class="col-lg-6">
+        <input type="text" name="menu[canonical][]" value="product" class="form-control form-control-sm rounded-0">
+    </div>
+    <div class="col-lg-1">
+        <input type="text" name="menu[order][]" value="0" class="form-control form-control-sm rounded-0">
+    </div>
+    <div class="col-lg-1 text-center">
+        <a href="" class="delete-menu btn btn-danger btn-sm">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
+</div> --}}

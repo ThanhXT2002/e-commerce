@@ -19,6 +19,7 @@ class MenuService extends BaseService implements MenuServiceInterface
 {
 
     protected $menuRepository;
+    protected $nestedset;
     
 
     public function __construct(
@@ -43,7 +44,7 @@ class MenuService extends BaseService implements MenuServiceInterface
         return [];
     }
 
-    public function create($request){
+    public function create($request, $languageId){
         DB::beginTransaction();
         try{
             $payload = $request->only(['menu', 'menu_catalogue_id', 'type']);
@@ -63,7 +64,7 @@ class MenuService extends BaseService implements MenuServiceInterface
                             'name' =>$val,
                             'canonical' => $payload['menu']['canonical'][$key]
                         ];
-                        $this->menuRepository->createPivot($menu,$payload,'languages');
+                        $this->menuRepository->createPivot($menu,$payloadLanguage,'languages');
                     }
                     
                 }

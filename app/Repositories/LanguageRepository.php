@@ -20,8 +20,6 @@ class LanguageRepository extends BaseRepository implements LanguageRepositoryInt
         $this->model = $model;
     }
 
-    public function all(array $relation = []){
-        return $this->model->with($relation)->get();
-    }
+   
 
 }

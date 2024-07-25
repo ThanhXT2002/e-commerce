@@ -24,6 +24,7 @@ class Menu extends Model
         'album',
         'publish',
         'follow',
+        'type',
         'order',
         'user_id',
         'menu_catalogue_id',

@@ -48,7 +48,7 @@ class MenuController extends Controller
     public function index(Request $request){ 
         $this->authorize('modules', 'menu.index');
         
-        $menus = $this->menuCatalogueService->paginate($request, 1);
+        $menuCatalogues = $this->menuCatalogueService->paginate($request, 1);
         $config = [
             'js'=> [
                 'backend/plugins/bootstrap-switch/js/bootstrap-switch.min.js',
@@ -66,12 +66,12 @@ class MenuController extends Controller
                 'backend/plugins/select2/css/select2.min.css',
                 'backend/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css',
             ],
-            'model' => 'menu'
+            'model' => 'MenuCatalogue'
         ];
         $config['seo'] = __('messages.menu'); 
        
         return view('backend.menu.index',compact(
-            'menus',
+            'menuCatalogues',
              'config',
              
         ));
@@ -109,9 +109,10 @@ class MenuController extends Controller
             'MenuCatalogues'
         ));
     }
+    
 
     public function update($id, UpdateMenuRequest $request){
-        if($this->menuService->update($id, $request)){
+        if($this->menuService->update($id, $request, $this->language)){
             return redirect()->route('menu.index')->with('success','Cập nhật bản ghi thành công');
         }
         return redirect()->route('menu.index')->with('error','Cập nhật bản ghi không thành công. Hãy thử lại');

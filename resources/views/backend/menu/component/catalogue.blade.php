@@ -28,7 +28,7 @@
                     </div>
                     <div class="col-lg-6">
                         <select name="type" class="form-control form-control-sm rounded-0 shadow border border-info select2">
-                            @foreach (__('module.type') as $key => $val) <!-- Giả sử bạn muốn lấy dữ liệu từ $menuTypes cho kiểu Menu -->
+                            @foreach (__('module.type') as $key => $val) 
                                 <option value="{{ $key }}">{{ $val }}</option>
                             @endforeach
                         </select>

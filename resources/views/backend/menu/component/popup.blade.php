@@ -13,16 +13,19 @@
 
                     <label for="" class="control-label text-left">Tên vị trí hiển thị<span
                             class="text-danger">(*)</span></label>
-                    <input type="text" name="name" value="{{ old('menu', $menu->name ?? '') }}"
+                    <input type="text" name="name"
+                        value="{{ is_string(old('menu')) ? old('menu') : $menu->name ?? '' }}"
                         class="form-control form-control-sm rounded-0 shadow border border-info" placeholder=""
                         autocomplete="off">
                     <div class ="text-danger error name text-left"></div>
                 </div>
                 <div class="col-lg-12">
                     <label for="" class="control-label text-left">Từ khóa </label>
-                    <input type="text" name="keyword" value="{{ old('menu', $menu->name ?? '') }}"
+                    <input type="text" name="keyword"
+                        value="{{ is_string(old('menu')) ? old('menu') : $menu->keyword ?? '' }}"
                         class="form-control form-control-sm rounded-0 shadow border border-info" placeholder=""
                         autocomplete="off">
+
                     <div class ="text-danger error keyword text-left"></div>
                 </div>
             </div>
