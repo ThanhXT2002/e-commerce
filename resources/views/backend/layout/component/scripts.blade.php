@@ -5,7 +5,7 @@
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <!-- Bootstrap 4 -->
 <script src="backend/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="backend/js/pages/dashboard.js"></script>
+{{-- <script src="backend/js/pages/dashboard.js"></script> --}}
 
 
 
@@ -28,3 +28,5 @@
 </script>
 @endif
 <script src="backend/library/library.js"></script>
+
+

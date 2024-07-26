@@ -44,15 +44,16 @@ class MenuService extends BaseService implements MenuServiceInterface
         return [];
     }
 
-    public function create($request, $languageId){
+    public function create($request, $languageId, $menu = null){
         DB::beginTransaction();
         try{
             $payload = $request->only(['menu', 'menu_catalogue_id', 'type']);
             if(count($payload['menu']['name'])){
                 foreach ($payload['menu']['name'] as $key => $val) {
                     $menuArray = [
-                        'menu_catalogue_id' => $payload['menu_catalogue_id'],
-                        'type'=>$payload['type'],
+                        'menu_catalogue_id' => (isset($payload['menu_catalogue_id'])) ? $payload['menu_catalogue_id'] : $menu->menu_catalogue_id,
+                        'parent_id' => (is_null($menu)) ? 0 : $menu->id,
+                        'type'=>(is_null($menu)) ? $payload['type'] : '',
                         'order' => $payload['menu']['order'][$key],
                         'user_id'=> Auth::id(),                    
                     ];

@@ -8,11 +8,14 @@ return [
         'create' => [
             'title' => 'Thêm mới menu'
         ],
-        'edit' => [
-            'title' => 'Cập nhật nhóm menu'
+        'show' => [
+            'title' => 'Danh sách menu'
         ],
         'delete' => [
             'title' => 'Xóa menu'
+        ],
+        'children' => [
+            'title' => 'Cập nhật menu con cho mục'
         ],
     ],
     'system' => [

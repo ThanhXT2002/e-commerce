@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMenuRequest;
+use App\Http\Requests\storeMenuChildrenRequest;
 use App\Http\Requests\UpdateMenuRequest;
 use Illuminate\Http\Request;
 use App\Services\Interfaces\MenuServiceInterface  as MenuService;
@@ -99,14 +100,21 @@ class MenuController extends Controller
 
     public function edit($id){
         $this->authorize('modules', 'menu.edit');
-        $menu = $this->menuRepository->findById($id);
+        $language = $this->language;
+        $menus = $this->menuRepository->findByCondition([
+            ['menu_catalogue_id','=', $id]
+        ], TRUE, [
+            'languages' => function($query) use ($language){
+                $query->where('language_id', $language);
+            }
+        ]);
         $config = $this->config();
         $config['seo'] = __('messages.menu');
-        $config['method'] = 'edit';
-        return view('backend.menu.store',compact(
+        $config['method'] = 'show';
+        return view('backend.menu.show',compact(
             'config',
-            'menu',
-            'MenuCatalogues'
+            'menus',
+            
         ));
     }
     
@@ -135,6 +143,32 @@ class MenuController extends Controller
         return redirect()->route('menu.index')->with('error','Xóa bản ghi không thành công. Hãy thử lại');
     }
 
+    public function children($id){
+        $this->authorize('modules', 'menu.children');
+        $language = $this->language;
+        $menu = $this->menuRepository->findById($id, ['*'],[
+            'languages' => function($query) use ($language){
+                $query->where('language_id', $language);
+            }
+        ]);
+        $config = $this->config();
+        $config['seo'] = __('messages.menu');
+        $config['method'] = 'children';
+        return view('backend.menu.children',compact(
+            'config',
+            'menu'
+        ));
+    }
+
+    public function saveChildren($id,storeMenuChildrenRequest $request){
+        $menu = $this->menuRepository->findById($id);
+        if($this->menuService->create($request, $this->language, $menu)){
+            return redirect()->route('menu.index')->with('success','Thêm mới bản ghi thành công');
+        }
+        return redirect()->route('menu.index')->with('error','Thêm mới bản ghi không thành công. Hãy thử lại');
+
+    }
+
     private function config(){
         return [
             'js'=> [
@@ -143,6 +177,7 @@ class MenuController extends Controller
                 'backend/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js',
                 'backend/plugins/ckfinder_2/ckfinder.js',
                 'backend/library/finder.js',
+                'backend/plugins/nestable/jquery.nestable.js',
                 'backend/library/menu.js',
             ],
             'css'=>[
