@@ -92,8 +92,11 @@
         let $removeCol = $('<div>').addClass('col-lg-1 text-center');
         let $a = $('<a>').addClass('delete-menu btn btn-danger btn-sm');
         let $i = $('<i>').addClass('fas fa-trash');
+        let $input = $('<input>').addClass('hidden').val(0).attr('name','menu[id][]').attr('value', 0)
+
         $a.append($i);
         $removeCol.append($a);
+        $removeCol.append($input);
         $row.append($removeCol);
 
         return $row;
@@ -302,27 +305,52 @@
         })
     }
 
-
-    HT.updateOutput = function(e) {
-        var list = e.length ? e : $(e.target),
-            output = list.data('output');
-        if (window.JSON) {
-            output.val(window.JSON.stringify(list.nestable('serialize')));
-        } else {
-            output.val('JSON browser support required for this demo.');
-        }
-    };
-    
     HT.setupNestable = function() {
         if ($('#nestable2').length) {
             $('#nestable2').nestable({
                 group: 1
-            }).on('change', HT.updateOutput);
-            
-            // Khởi tạo outputsentence-case
-            HT.updateOutput($('#nestable2').data('output', $('#nestable2-output')));
+            }).on('change', HT.updateNestableOutput);
         }
     };
+
+    HT.updateNestableOutput = function(e) {
+        // var list = e.length ? e : $(e.target),
+        //     output = list.data('output');
+        // if (window.JSON) {
+        //     output.val(window.JSON.stringify(list.nestable('serialize')));
+        // } else {
+        //     output.val('JSON browser support required for this demo.');
+        // }
+
+        var list = $(e.currentTarget),
+            output = $(list.data('output'));
+
+        let json = window.JSON.stringify(list.nestable('serialize'));
+        if(json.length){
+
+            let option = {
+                json:json,
+                catalogueId: $('#dataCatalogue').attr('data-catalogueId'),
+                _token : _token
+            }
+            $.ajax({
+                url: 'ajax/menu/drag', // URL xử lý yêu cầu AJAX
+                type: 'POST', // Phương thức gửi dữ liệu
+                data: option, // Dữ liệu được gửi
+                dataType: 'json', // Kiểu dữ liệu nhận về
+                success: function (res) {
+                    
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Xử lý lỗi khi yêu cầu thất bại
+                    console.log('Lỗi: ' + textStatus + ' ' + errorThrown); // Hiển thị lỗi khác
+                }
+            });
+
+        }
+    };
+    
+
     
     HT.expandAndCollapse = function() {
         $('#nestable-menu').on('click', function(e) {

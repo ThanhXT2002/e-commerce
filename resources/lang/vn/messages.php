@@ -8,8 +8,8 @@ return [
         'create' => [
             'title' => 'Thêm mới menu'
         ],
-        'show' => [
-            'title' => 'Danh sách menu'
+        'edit' => [
+            'title' => 'Chỉnh sửa menu'
         ],
         'delete' => [
             'title' => 'Xóa menu'

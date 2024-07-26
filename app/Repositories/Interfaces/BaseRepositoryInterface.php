@@ -28,6 +28,6 @@ interface BaseRepositoryInterface
     public function updateByWhereIn(string $whereInField = '', array $whereIn = [], array $payload = []);
     public function createPivot($model, array $payload = [], string $relation = '');
     public function forceDeleteByCondition(array $condition = []);
-    public function findByCondition($condition = [], $flag = false, $relation = []);
+    public function findByCondition($condition = [], $flag = false, $relation = [], $orderBy = ['id', 'desc']);
 
 }

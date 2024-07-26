@@ -11,7 +11,7 @@ class MenuLanguage extends Model
 
     protected $table = 'menu_language';
 
-    public function menus(){
-        return $this->belongsTo(Menu::class, 'menu_id', 'id');
-    }
+    // public function menus(){
+    //     return $this->belongsTo(Menu::class, 'menu_id', 'id');
+    // }
 }

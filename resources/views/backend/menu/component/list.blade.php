@@ -93,32 +93,36 @@
                     <div class="col-lg-1  text-center"><label for="">Xóa</label></div>
                 </div>
                 <hr class="border border-1 border-info">
+                @php
+                    $menu = old('menu', ($menuList) ?? null);
+                @endphp
                 <div class="menu-wrapper">
                     <div
-                        class="notification text-center mt-2 {{ is_array(old('menu')) && count(old('menu')) ? 'none' : '' }}">
+                        class="notification text-center mt-2 {{ (is_array($menu) && count($menu)) ? 'hidden' : '' }}">
                         <h5>Danh sách kiên kết này chưa có bất kỳ đường dẫn nào.</h5>
                         <p>Hãy nhấn vào <span class="text-info">"Thêm đường dẫn"</span> để bắt đầu thêm. </p>
                     </div>
-                    @if (is_array(old('menu')) && count(old('menu')))
-                        @foreach (old('menu')['name'] as $key => $val)
-                            <div class="row mb-3 menu-item {{ old('menu')['canonical'][$key] }}">
+                    @if (is_array($menu) && count($menu))
+                        @foreach ($menu['name'] as $key => $val)
+                            <div class="row mb-3 menu-item {{ $menu['canonical'][$key] }}">
                                 <div class="col-lg-4">
                                     <input type="text" name="menu[name][]" value="{{ $val }}"
                                         class="form-control form-control-sm rounded-0">
                                 </div>
                                 <div class="col-lg-6">
                                     <input type="text" name="menu[canonical][]"
-                                        value="{{ old('menu')['canonical'][$key] }}"
+                                        value="{{ $menu['canonical'][$key] }}"
                                         class="form-control form-control-sm rounded-0">
                                 </div>
                                 <div class="col-lg-1">
-                                    <input type="text" name="menu[order][]" value="{{ old('menu')['order'][$key] }}"
+                                    <input type="text" name="menu[order][]" value="{{ $menu['order'][$key] }}"
                                         class="form-control form-control-sm rounded-0">
                                 </div>
                                 <div class="col-lg-1 text-center">
                                     <a  class="delete-menu btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i>
                                     </a>
+                                    <input type="text" class="hidden" name="menu[id][]" value="{{$menu['id'][$key]}}">
                                 </div>
                             </div>
                         @endforeach

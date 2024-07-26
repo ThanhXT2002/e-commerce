@@ -28,51 +28,19 @@
                             <a href="#" class="btn btn-sm btn-danger rounded-0">Cập nhật Menu</a>
                         </div>
                     </div>
-                    <div class="card-body">
-
-
-                        <div class="dd" id="nestable2">
-                            @if(count($menus))
-                            <ol class="dd-list">
-                                @foreach($menus as $key => $val)
-                                @php
-                                  $languageMenu = $val ->languages->first()  
-                                @endphp
-                                <li class="dd-item" data-id="1">
-                                    <div class="dd-handle  sentence-case">
-                                        <span class="label"><i class="fa fa-cog"></i></span> {{$languageMenu->pivot->name}}
-                                        
-                                    </div>
-                                    <a href="{{route('menu.children', $val->id)}}" class="float-right create-chilfren-menu">Quản lý menu con</a>
-                                    <ol class="dd-list">
-                                        <li class="dd-item" data-id="2">
-                                            <div class="dd-handle sentence-case">                                               
-                                                <span class="label "><i class="fa fa-laptop"></i></span> Trần Xuân Thành
-                                                <span class="float-right"> 11:00 pm </span>
-                                            </div>
-                                        </li>
-                                        <li class="dd-item" data-id="3">
-                                            <div class="dd-handle">                                           
-                                                <span class="label "><i class="fa fa-laptop"></i></span> Xuân Thành
-                                                <span class="float-right"> 11:00 pm </span>
-                                            </div>
-                                        </li>
-                                        <li class="dd-item" data-id="4">
-                                            <div class="dd-handle">
-                                                <span class="label"><i class="fa fa-laptop"></i></span> VL Gắt
-                                                <span class="float-right"> 11:00 pm </span>
-                                            </div>
-                                        </li>
-                                    </ol>
-                                </li>
-                                @endforeach
-                            </ol>
-                            @endif
+                    <div class="card-body" id="dataCatalogue" data-catalogueId={{$id}}>
+                        @php
+                            $menus = recursive($menus);
+                            $menuString = recursive_menu($menus);
+                        @endphp
+                         @if(count($menus))
+                        <div class="dd" id="nestable2">                          
+                          <ol class="dd-list">
+                                {!! $menuString !!}
+                          </ol>
                         </div>
-                        <div class="m-t-md">
-                            <h5>Serialised Output</h5>
-                        </div>
-                        <textarea id="nestable2-output" class="form-control"></textarea>
+                        @endif
+                        
                     </div><!-- /.card-body -->
                 </div>
 
@@ -81,3 +49,39 @@
         </div>
     </section>
 @endsection
+
+
+{{-- <ol class="dd-list">
+    @foreach($menus as $key => $val)
+    @php
+      $languageMenu = $val ->languages->first()  
+    @endphp
+    <li class="dd-item" data-id="1">
+        <div class="dd-handle">
+            <span class="label"><i class="fa fa-cog"></i></span> {{$languageMenu->pivot->name}}
+            
+        </div>
+        <a href="{{route('menu.children', $val->id)}}" class="float-right create-chilfren-menu">Quản lý menu con</a>
+        <ol class="dd-list">
+            <li class="dd-item" data-id="2">
+                <div class="dd-handle ">                                               
+                    <span class="label "><i class="fa fa-laptop"></i></span> Trần Xuân Thành
+                    <span class="float-right"> 11:00 pm </span>
+                </div>
+            </li>
+            <li class="dd-item" data-id="3">
+                <div class="dd-handle">                                           
+                    <span class="label "><i class="fa fa-laptop"></i></span> Xuân Thành
+                    <span class="float-right"> 11:00 pm </span>
+                </div>
+            </li>
+            <li class="dd-item" data-id="4">
+                <div class="dd-handle">
+                    <span class="label"><i class="fa fa-laptop"></i></span> VL Gắt
+                    <span class="float-right"> 11:00 pm </span>
+                </div>
+            </li>
+        </ol>
+    </li>
+    @endforeach
+</ol> --}}

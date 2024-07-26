@@ -107,13 +107,14 @@ class MenuController extends Controller
             'languages' => function($query) use ($language){
                 $query->where('language_id', $language);
             }
-        ]);
+        ], ['order', 'DESC']);
         $config = $this->config();
         $config['seo'] = __('messages.menu');
-        $config['method'] = 'show';
+        $config['method'] = 'edit';
         return view('backend.menu.show',compact(
             'config',
             'menus',
+            'id'
             
         ));
     }
@@ -151,21 +152,26 @@ class MenuController extends Controller
                 $query->where('language_id', $language);
             }
         ]);
+       
+
+        $menuList = $this->menuService->getAndConvertMenu($menu, $language);
+       
         $config = $this->config();
         $config['seo'] = __('messages.menu');
         $config['method'] = 'children';
         return view('backend.menu.children',compact(
             'config',
-            'menu'
+            'menu',
+            'menuList'
         ));
     }
 
     public function saveChildren($id,storeMenuChildrenRequest $request){
         $menu = $this->menuRepository->findById($id);
-        if($this->menuService->create($request, $this->language, $menu)){
-            return redirect()->route('menu.index')->with('success','Thêm mới bản ghi thành công');
+        if($this->menuService->saveChildren($request, $this->language, $menu)){
+            return redirect()->route('menu.edit', ['id' =>$menu->menu_catalogue_id ])->with('success','Thêm mới bản ghi thành công');
         }
-        return redirect()->route('menu.index')->with('error','Thêm mới bản ghi không thành công. Hãy thử lại');
+        return redirect()->route('menu.edit', ['id' =>$menu->menu_catalogue_id ])->with('error','Thêm mới bản ghi không thành công. Hãy thử lại');
 
     }
 

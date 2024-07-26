@@ -55,7 +55,9 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function update(int $id = 0, array $payload = []){
        $model = $this->findById($id);
-       return $model->update($payload);
+       $model->fill($payload);
+       $model->save();
+       return $model;
     }
 
     public function updateOrInsert(array $payload = [], array $condition = []){
@@ -104,12 +106,13 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->select($column)->with($relation)->findOrFail($modelId);
     }
 
-    public function findByCondition($condition = [], $flag = false, $relation = []){
+    public function findByCondition($condition = [], $flag = false, $relation = [], $orderBy = ['id', 'desc']){
         $query = $this->model->newQuery();
         foreach($condition as $key => $val){
             $query->where($val[0], $val[1] , $val[2]);
         }
         $query->with($relation);
+        $query->orderBy($orderBy[0], $orderBy[1]);
         return ($flag == false) ? $query->first(): $query->get();
     }
 
