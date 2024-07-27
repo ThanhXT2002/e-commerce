@@ -106,6 +106,14 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->select($column)->with($relation)->findOrFail($modelId);
     }
 
+    public function findByWhereHas(array $condition = [], string $relation = '',string $alias = ''){
+        return $this->model->with('languages')->whereHas($relation, function ($query) use ($condition, $alias){
+            foreach ($condition as $key => $val) {
+                    $query->where($alias.'.'.$key, $val);
+            }
+        })->first();
+    }
+
     public function findByCondition($condition = [], $flag = false, $relation = [], $orderBy = ['id', 'desc']){
         $query = $this->model->newQuery();
         foreach($condition as $key => $val){

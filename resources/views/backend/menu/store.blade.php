@@ -6,10 +6,7 @@
     ])
     <section class="content mt-4">
        @include('backend.layout.component.formError')
-        @php
-            $url = $config['method'] == 'create' ? route('menu.store') : route('menu.update', $menu->id);
-        @endphp
-        <form action="{{ $url }}" method="post" class="box">
+        <form action="{{ route('menu.store') }}" method="post" class="box">
             @csrf
             <div class="wrapper wrapper-content animated fadeInRight my-2">
                 @include('backend.menu.component.catalogue')

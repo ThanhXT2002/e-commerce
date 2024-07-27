@@ -5,12 +5,15 @@ namespace App\Services;
 
 use App\Services\Interfaces\MenuServiceInterface;
 use App\Repositories\Interfaces\MenuRepositoryInterface as MenuRepository;
+use App\Repositories\Interfaces\RouterRepositoryInterface as RouterRepository;
+use App\Repositories\Interfaces\MenuCatalogueRepositoryInterface as MenuCatalogueRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Classes\Nestedsetbie;
+use Illuminate\Support\Str;
 /**
  * Class MenuService
  * @package App\Services
@@ -19,13 +22,19 @@ class MenuService extends BaseService implements MenuServiceInterface
 {
 
     protected $menuRepository;
+    protected $routerRepository;
+    protected $menuCatalogueRepository;
     protected $nestedset;
     
 
     public function __construct(
-        MenuRepository $menuRepository
+        MenuRepository $menuRepository,
+        RouterRepository $routerRepository,
+        MenuCatalogueRepository $menuCatalogueRepository
     ){
         $this->menuRepository = $menuRepository;
+        $this->routerRepository = $routerRepository;
+        $this->menuCatalogueRepository = $menuCatalogueRepository;
     }
 
     private function initialize($languageId){
@@ -53,29 +62,43 @@ class MenuService extends BaseService implements MenuServiceInterface
         return [];
     }
 
-    public function create($request, $languageId){
+    public function save($request, $languageId){
         DB::beginTransaction();
         try{
-            $payload = $request->only(['menu', 'menu_catalogue_id', 'type']);
+            $payload = $request->only(['menu', 'menu_catalogue_id']);
             if(count($payload['menu']['name'])){
                 foreach ($payload['menu']['name'] as $key => $val) {
+                    $menuId = $payload['menu']['id'][$key];
                     $menuArray = [
                         'menu_catalogue_id' => $payload['menu_catalogue_id'],
-                        'type'=>$payload['type'],
                         'order' => $payload['menu']['order'][$key],
                         'user_id'=> Auth::id(),                    
                     ];
-                    $menu = $this->menuRepository->create($menuArray);
-                    if($menu->id > 0){
-                        $menu->languages()->detach([$languageId, $menu->id]);
+                    if($menuId == 0){
+                        $menuSave = $this->menuRepository->create($menuArray);
+                    }else{
+                        $menuSave = $this->menuRepository->update($menuId, $menuArray);
+                        
+                        if($menuSave->rgt - $menuSave->lft > 1){
+                            $this->menuRepository->updateByWhere(
+                                [
+                                    ['lft', '>', $menuSave->lft],
+                                    ['rgt', '<', $menuSave->rgt],
+    
+                                ], ['menu_catalogue_id' => $payload['menu_catalogue_id']]
+                            );
+                        }
+                    } 
+                    if($menuSave->id > 0){
+                        $menuSave->languages()->detach([$languageId, $menuSave->id]);
+                       
                         $payloadLanguage= [
                             'language_id' =>$languageId,
                             'name' =>$val,
                             'canonical' => $payload['menu']['canonical'][$key]
                         ];
-                        $this->menuRepository->createPivot($menu,$payloadLanguage,'languages');
+                        $this->menuRepository->createPivot($menuSave,$payloadLanguage,'languages');
                     }
-                    
                 }
                 $this->initialize($languageId);
                 $this->nestedset();
@@ -153,8 +176,12 @@ class MenuService extends BaseService implements MenuServiceInterface
     public function destroy($id){
         DB::beginTransaction();
         try{
-            $menu = $this->menuRepository->delete($id);
+            $this->menuRepository->forceDeleteByCondition(
+                [
+                    ['menu_catalogue_id', '=', $id]
+                ]);
 
+            $this->menuCatalogueRepository->forceDelete($id);
             DB::commit();
             return true;
         }catch(\Exception $e ){
@@ -165,38 +192,7 @@ class MenuService extends BaseService implements MenuServiceInterface
         }
     }
 
-    public function updateStatus($post = []){
-        DB::beginTransaction();
-        try{
-            $payload[$post['field']] = (($post['value'] == 1)?2:1);
-            $menu = $this->menuRepository->update($post['modelId'], $payload);
-
-            DB::commit();
-            return true;
-        }catch(\Exception $e ){
-            DB::rollBack();
-            // Log::error($e->getMessage());
-            echo $e->getMessage();die();
-            return false;
-        }
-    }
-
-    public function updateStatusAll($post){
-        DB::beginTransaction();
-        try{
-            $payload[$post['field']] = $post['value'];
-            $flag = $this->menuRepository->updateByWhereIn('id', $post['id'], $payload);
-
-            DB::commit();
-            return true;
-        }catch(\Exception $e ){
-            DB::rollBack();
-            // Log::error($e->getMessage());
-            echo $e->getMessage();die();
-            return false;
-        }
-    }
-
+    
     public function getAndConvertMenu($menu = null, $language = 1): array
     {
         $menuList = $this->menuRepository->findByCondition([
@@ -207,6 +203,11 @@ class MenuService extends BaseService implements MenuServiceInterface
             }
         ]);
 
+       
+        return $this->convertMenu($menuList);
+    }
+
+    public function convertMenu($menuList = null){
         $temp = [];
         $fields = ['name', 'canonical', 'order', 'id'];
 
@@ -246,19 +247,90 @@ class MenuService extends BaseService implements MenuServiceInterface
         $this->initialize($languageId);
         $this->nestedset();
     }
+
+    public function findMenuItemTranslate($menus, int $currentLanguage = 1, int $languageId = 1){
+        $output = [];
+        if (count($menus)) {
+            foreach ($menus as $key => $menu) {
+                $canonical = $menu->languages->first()->pivot->canonical;
+
+                $detailMenu = $this->menuRepository->findById($menu->id, ['*'], [
+                    'languages' => function($query) use ($languageId){
+                        $query->where('language_id', $languageId);
+                    }
+                ]);
+
+                if($detailMenu){
+                    if($detailMenu->languages->isNotEmpty()){
+                        $menu->translate_name = $detailMenu->languages->first()->pivot->name;
+                        $menu->translate_canonical = $detailMenu->languages->first()->pivot->canonical;
+                    }else{
+                        $router = $this->routerRepository->findByCondition([
+                            ['canonical', '=', $canonical]
+                        ]); 
+                        if ($router) {
+                            $controller = explode('\\', $router->controllers);
+                            $model = str_replace('Controller', '', end($controller));
+                
+                            $repositoryInterfaceNamespace = '\App\Repositories\\' . $model . 'Repository';
+                            if (class_exists($repositoryInterfaceNamespace)) {
+                                $repositoryInstance = app($repositoryInterfaceNamespace);
+                            }
+                            $alias = Str::snake($model) . '_language';
+                            $object = $repositoryInstance->findByWhereHas([
+                                'canonical' => $canonical,
+                                'language_id' => $currentLanguage
+                            ], 'languages', $alias);
+                
+                            if ($object) {
+                                $translateObject = $object->languages()
+                                    ->where('language_id', $languageId)
+                                    ->first([$alias.'.name', $alias.'.canonical']);
+                                if (!is_null($translateObject)) {
+                                    $menu->translate_name = $translateObject->name;
+                                    $menu->translate_canonical = $translateObject->canonical;
+                                }
+                            }
+                        }
+                    }
+                }
+                $output[] = $menu;
+            }
+        }
     
-    
-    private function paginateSelect(){
-        return [
-            'menus.id',
-            'menus.publish',
-            'menus.image',
-            'menus.order',
-            'tb2.name',
-            'tb2.canonical',
-        ];
+        return $output;
     }
 
+    public function saveTranslateMenu($request, int $languageId = 1)
+    {
+        DB::beginTransaction();
+        try {
+            $payload = $request->only('translate');
+            if (isset($payload['translate']['name']) && count($payload['translate']['name'])) {
+                foreach ($payload['translate']['name'] as $key => $val) {
+                    if ($val == null) continue;
+                    $temp = [
+                        'language_id' => $languageId,
+                        'name' => $val,
+                        'canonical' => $payload['translate']['canonical'][$key],
+                    ];
+                    $menu = $this->menuRepository->findById($payload['translate']['id'][$key]);
+                    if ($menu) {
+                        $menu->languages()->detach($languageId);
+                        $this->menuRepository->createPivot($menu, $temp, 'languages');
+                    }
+                }
+            }
 
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Log::error($e->getMessage());
+            echo $e->getMessage();
+            die();
+            return false;
+        }
+    }
 
 }

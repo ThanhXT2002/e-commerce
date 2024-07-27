@@ -4,11 +4,27 @@
     @include('backend.layout.component.breadcrumb', [
         'title' => $config['seo'][$config['method']]['title'],
     ])
+
     <section class="content mt-4">
         @include('backend.layout.component.formError')
+        <div class="mb-2 d-flex justify-content-end">
+            @foreach ($languages as $language)
+            @php
+            $url = (session('app_locale') === $language->canonical) ? route('menu.edit', ['id' =>$id]) : route('menu.translate', ['languageId' => $language->id, 'id'=>$id]);
+        @endphp
+            <div class="pb-1 ml-3 language-item-system   {{ $language->id == $languageId ? 'active' : '' }}">
+                <a class=" "
+                href="{{ $url }}">
+                <img src="{{ $language->image }}" alt=""
+                    style="height: 28px; width:40px; object-fit:cover">
+            </a>
+            </div>
+        @endforeach
+        </div>
         <div class="row">
             <div class="col-lg-4 px-4">
-                <h5 class="text-uppercase text-gray-dark"><strong>Danh sác menu</strong></h5>
+                
+                <h5 class="text-uppercase text-gray-dark"><strong>Danh sách menu</strong></h5>
                 <ul class="text-justify">
                     <li>Danh sách Menu giúp bạn dễ dàng kiểm soát bố cục menu. Bạn có thể thêm mới hoặc cập nhật Menu bằng
                         nút <span class="text-info">Cập nhật Mneu</span>.</li>
@@ -21,26 +37,27 @@
             <div class="col-lg-8">
                 <div class="card bg-white shadow-lg rounded-0">
                     <div class="card-header">
-                        <h3 class="card-title font-weight-bold text-muted mt-1">Menu chính <span
+                        <h3 class="card-title font-weight-bold text-muted mt-1">{{ $menuCatalogue->name }}<span
                                 class="text-danger">(*)</span></h3>
 
                         <div class="card-tools">
-                            <a href="#" class="btn btn-sm btn-danger rounded-0">Cập nhật Menu</a>
+                            <a href="{{ route('menu.editMenu', ['id' => $id]) }}" class="btn btn-sm btn-danger rounded-0">Cập
+                                nhật Menu cấp 1</a>
                         </div>
                     </div>
-                    <div class="card-body" id="dataCatalogue" data-catalogueId={{$id}}>
+                    <div class="card-body" id="dataCatalogue" data-catalogueId={{ $id }}>
                         @php
                             $menus = recursive($menus);
                             $menuString = recursive_menu($menus);
                         @endphp
-                         @if(count($menus))
-                        <div class="dd" id="nestable2">                          
-                          <ol class="dd-list">
-                                {!! $menuString !!}
-                          </ol>
-                        </div>
+                        @if (count($menus))
+                            <div class="dd" id="nestable2">
+                                <ol class="dd-list">
+                                    {!! $menuString !!}
+                                </ol>
+                            </div>
                         @endif
-                        
+
                     </div><!-- /.card-body -->
                 </div>
 
@@ -52,7 +69,7 @@
 
 
 {{-- <ol class="dd-list">
-    @foreach($menus as $key => $val)
+    @foreach ($menus as $key => $val)
     @php
       $languageMenu = $val ->languages->first()  
     @endphp

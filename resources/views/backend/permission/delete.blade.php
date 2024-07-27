@@ -1,6 +1,17 @@
 @extends('backend.layout.layoutadmin')
 @section('content')
-@include('backend.dashboard.component.breadcrumb', ['title' => $config['seo']['create']['title']])
+    @include('backend.layout.component.breadcrumb', ['title' => $config['seo']['delete']['title'].])
+    <section class="content mt-2">
+        @include('backend.layout.component.formError')
+        <form action="{{ route('permission.destroy', $permission->id) }}" method="post" class="box">
+            @include('backend.layout.component.destroy', ['model' => $permission])
+         </form>
+    </section>
+@endsection
+
+{{-- @extends('backend.layout.layoutadmin')
+@section('content')
+@include('backend.layout.component.breadcrumb', ['title' => $config['seo']['delete']['title']])
 
 <form action="{{ route('permission.destroy', $permission->id) }}" method="post" class="box">
     @csrf
@@ -45,4 +56,6 @@
         </div>
     </div>
 </form>
-@endsection
+@endsection --}}
+
+

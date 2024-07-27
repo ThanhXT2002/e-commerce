@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Overtrue\Pinyin\Pinyin;
 
 /**
  * Class LanguageService
@@ -117,9 +118,19 @@ class LanguageService extends BaseService implements LanguageServiceInterface
       
     }
 
+    
+
     public function saveTranslate($option, $request){
         DB::beginTransaction();
         try{
+
+            $slug = $request->input('translate_canonical');
+            $translate_canonical = Str::slug($slug);
+            
+            $pinyin = new Pinyin();
+            $canonical = !empty($translate_canonical) ? $translate_canonical : Str::slug($pinyin->permalink($slug));
+
+
             $payload = [
                 'name' => $request->input('translate_name'),
                 'description' => $request->input('translate_description'),
@@ -127,7 +138,7 @@ class LanguageService extends BaseService implements LanguageServiceInterface
                 'meta_title' => $request->input('translate_meta_title'),
                 'meta_keyword' => $request->input('translate_meta_keyword'),
                 'meta_description' => $request->input('translate_meta_description'),
-                'canonical' => Str::slug($request->input('translate_canonical')),
+                'canonical' =>  $canonical,
                 $this->converModelToField($option['model']) => $option['id'],
                 'language_id' => $option['languageId']
             ];
@@ -148,11 +159,12 @@ class LanguageService extends BaseService implements LanguageServiceInterface
                 ]
             );
             $router = [
-                'canonical' => Str::slug($request->input('translate_canonical')),
+                'canonical' =>  $canonical,
                 'module_id' => $model->id,
                 'language_id' => $option['languageId'],
                 'controllers' => 'App\Http\Controllers\Frontend\\'.$controllerName.'',
             ];
+            
             $this->routerRepository->create($router);
             DB::commit();
             return true;

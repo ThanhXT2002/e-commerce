@@ -11,11 +11,17 @@ return [
         'edit' => [
             'title' => 'Chỉnh sửa menu'
         ],
+        'update' => [
+            'title' => 'Cập nhật Menu cấp 1'
+        ],
         'delete' => [
             'title' => 'Xóa menu'
         ],
         'children' => [
             'title' => 'Cập nhật menu con cho mục'
+        ],
+        'translate' => [
+            'title' => 'Tạo bản dịch {language} cho'
         ],
     ],
     'system' => [
